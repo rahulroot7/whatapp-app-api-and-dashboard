@@ -1,27 +1,29 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const Otp = sequelize.define('Otp', {
-    email: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    phone: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    otp: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    type: {
-      type: DataTypes.ENUM('login', 'resend', 'register'),
-      allowNull: false,
-    },
-    expires_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-  });
+const mongoose = require('mongoose');
 
-  return Otp;
-};
+const otpSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    default: null
+  },
+  phone: {
+    type: String,
+    default: null
+  },
+  otp: {
+    type: String,
+    required: true
+  },
+  type: {
+    type: String,
+    enum: ['login', 'resend', 'register'],
+    required: true
+  },
+  expires_at: {
+    type: Date,
+    required: true
+  }
+}, {
+  timestamps: true // adds createdAt and updatedAt
+});
+
+module.exports = mongoose.model('Otp', otpSchema);

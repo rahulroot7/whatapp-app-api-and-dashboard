@@ -1,38 +1,39 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const User = require('../models/User'); // mongoose model
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
-const JWT_SECRET = "signin";
 
-// Protect middleware to verify token
+const JWT_SECRET = process.env.JWT_SECRET || "signin";
+
+// Middleware to protect routes
 const protect = async (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
-    return res.json(new ApiResponse(401, null, "No token, authorization denied"));
+    return res.status(401).json(new ApiResponse(401, null, "No token, authorization denied"));
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+    req.user = decoded; // contains id and role (if encoded)
     next();
   } catch (error) {
-    res.status(200).send(new ApiError(401, "", "Invalid token, authorization denied"));
+    return res.status(401).json(new ApiError(401, "", "Invalid token, authorization denied"));
   }
 };
 
-// Admin check middleware
+// Middleware to allow only admins
 const adminAuth = async (req, res, next) => {
   try {
-    
-    const user = await User.findByPk(req.user.id);
+    const user = await User.findById(req.user.id);
+
     if (user && user.role === 'admin') {
       return next();
     } else {
-      return res.json(new ApiResponse(403, null, "Access denied, admin role required"));
+      return res.status(403).json(new ApiResponse(403, null, "Access denied, admin role required"));
     }
   } catch (error) {
-    res.status(200).send(new ApiError(500, "", "Server error"));
+    return res.status(500).json(new ApiError(500, "", "Server error"));
   }
 };
 
