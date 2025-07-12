@@ -1,13 +1,13 @@
-import mongoose from "mongoose";
-const mongoDBConnect = () => {
+const mongoose = require('mongoose');
+
+const mongoDBConnect = async () => {
   try {
-    mongoose.connect(process.env.MONGODB_URI, {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    });
-    console.log("MongoDB - Connected");
+    const connectionUri = process.env.ENV==="development"?process.env.MONGODB_URI:process.env.MONGODB_URI_LIVE
+    await mongoose.connect(connectionUri);
+    console.log('MongoDB - Connected');
   } catch (error) {
-    console.log("Error - MongoDB Connection " + error);
+    console.error('Error - MongoDB Connection:', error);
   }
 };
-export default mongoDBConnect;
+
+module.exports = mongoDBConnect;

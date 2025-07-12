@@ -1,40 +1,77 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
+  name: { type: String},
   first_name: { type: String },
   last_name: { type: String },
-  email: {
-    type: String,
-    unique: true,
-    sparse: true // prevent index issues with multiple nulls
-  },
-  phone: {
-    type: String,
-    unique: true,
-    required: true
-  },
-  password: { type: String },
+  email: { type: String, unique: true, sparse: true },
+  phone: { type: String, unique: true, sparse: true },
+  password: { type: String},
   role: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Role',
+    required: false
+  },
+  status: { type: String, enum: ['0', '1', '2'], default: '0' },
+  // 0 - active, 1 - inactive, 2 - blocked
+  email_verified: { type: Boolean, default: false },
+  bio: { type: String, default: 'Available' },
+  profilePic: {
     type: String,
-    enum: ['user', 'business_user', 'admin', 'super_admin'],
-    default: 'user'
+    default: 'https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg'
   },
-  status: {
-    type: String,
-    enum: ['0', '1', '2'],
-    default: '0'
+  contacts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  businessDetails: {
+    fullName: { type: String },
+    contactDetails: { type: String },
+    businessName: { type: String },
+    businessCategory: { type: String, enum: ['retail', 'service', 'manufacturing', 'other'] },
+    businessAddress: {
+      addressLine: { type: String },
+      pinCode: { type: String },
+      mapLocation: {
+        latitude: { type: Number },
+        longitude: { type: Number }
+      }
+    },
+    idProof: {
+      type: { type: String, enum: ['aadhar', 'pan'] },
+      number: { type: String },
+      otpVerified: { type: Boolean, default: false }
+    },
+    selfieUrl: { type: String },
+    socialLinks: {
+      facebook: { type: String },
+      instagram: { type: String },
+      website: { type: String }
+    }
   },
-  email_verified: {
-    type: Boolean,
-    default: false
-  },
-}, {
-  timestamps: true // includes createdAt and updatedAt
-});
-
-// Add soft delete (equivalent to Sequelize `paranoid`)
-userSchema.add({
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
   deletedAt: { type: Date, default: null }
+}, { timestamps: true });
+
+// Hash password before save
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
+  next();
 });
 
-module.exports = mongoose.model('User', userSchema);
+userSchema.methods.matchPassword = async function(enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// JWT token generator
+userSchema.methods.generateAuthToken = function () {
+  return jwt.sign(
+    { id: this._id, email: this.email, role: this.role },
+    process.env.JWT_SECRET || 'defaultsecret',
+    { expiresIn: '24h' }
+  );
+};
+
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);

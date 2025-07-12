@@ -1,26 +1,76 @@
-import dotenv from 'dotenv';
+const dotenv = require('dotenv');
 dotenv.config({ path: './.env.development' });
 
-import express from 'express';
-import cors from 'cors';
-import bodyParser from 'body-parser';
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const http = require('http'); // To create HTTP server
+const { Server } = require('socket.io');
 
-import connectDB from './config/config.js';
-import authRoutes from './routes/auth.js';
-import globleRoutes from './routes/route.js';
+const connectDB = require('./config/config');
+const authRoutes = require('./routes/auth');
+const globleRoutes = require('./routes/route');
+const adminRoutes = require('./routes/adminRoute');
 
 const app = express();
-
 connectDB();
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 app.use('/api/auth', authRoutes);
 app.use('/api', globleRoutes);
+app.use('/api/admin/', adminRoutes);
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+
+// Create HTTP server from express app
+const server = http.createServer(app);
+
+// Initialize Socket.IO server, attach to HTTP server
+const io = new Server(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: 'http://localhost:3000',
+  },
+});
+
+// Socket.IO event handlers
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+
+  socket.on('setup', (userData) => {
+    socket.join(userData.id);
+    socket.emit('connected');
+  });
+
+  socket.on('join room', (room) => {
+    socket.join(room);
+  });
+
+  socket.on('typing', (room) => socket.in(room).emit('typing'));
+
+  socket.on('stop typing', (room) => socket.in(room).emit('stop typing'));
+
+  socket.on('new message', (newMessageReceive) => {
+    const chat = newMessageReceive.chatId;
+    if (!chat.users) {
+      console.log('chat.users is not defined');
+      return;
+    }
+    chat.users.forEach((user) => {
+      if (user._id === newMessageReceive.sender._id) return;
+      socket.in(user._id).emit('message received', newMessageReceive);
+    });
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

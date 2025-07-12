@@ -1,0 +1,100 @@
+{
+    "dashboard": {
+        "routes": [
+            {
+                "key": "list",
+                "route": [
+                    "/api/admin/dashboard",
+                    "/api/admin/profile"
+                ]
+            },
+            {
+                "key": "view",
+                "route":["/api/admin/dashboard","/api/admin/dashboard/all/dashboard/count"]
+            }
+        ]
+    },
+    "roles": {
+        "routes": [
+            {
+                "key": "list",
+                "route": "/api/admin/role/all/role"
+            },
+            {
+                "key": "create",
+                "route": "/api/admin/role/create/role"
+            },
+            {
+                "key": "update",
+                "route": [
+                    "/api/admin/role/update/role"
+                ]
+            }
+        ]
+    },
+    "user": {
+        "routes": [
+            {
+                "key": "list",
+                "route": [
+                    "/api/admin/users/list",
+                    "/api/admin/business/users/list",
+                    "/api/admin/users/admin/list"
+                ]
+            },
+            {
+                "key": "d-list",
+                "route": "/api/admin/profile"
+            },
+            {
+                "key": "create",
+                "route": "/api/admin//user/create"
+            },
+            {
+                "key": "view",
+                "route": "/api/admin/dashboard-user/view/dashboard-user/:_id"
+            },
+            {
+                "key": "update",
+                "route": [
+                    "/api/admin/user/update/:id",
+                    "/api/admin/user/details/:id",
+                    "/api/admin/user/delete/:id",
+                    "/api/admin/user/change/status/:id"
+                ]
+            },
+            {
+                "key": "delete",
+                "route": "/api/admin/dashboard-user/delete/dashboard-user/:_id"
+            },
+            {
+                "key": "log",
+                "route": "/api/admin/activity/view/activity/:_id"
+            },
+            {
+                "key": "excel",
+                "route": "/api/admin/dashboard-user/export/excel/dashboard-user"
+            },
+            {
+                "key": "pdf",
+                "route": "/api/admin/dashboard-user/export/pdf/dashboard-user"
+            },
+            {
+                "key": "csv",
+                "route": "/api/admin/dashboard-user/export/csv/dashboard-user"
+            }
+        ]
+    },
+    "setting": {
+        "routes": [
+            {
+                "key": "view",
+                "route": "/api/admin/setting/view/setting"
+            },
+            {
+                "key": "create",
+                "route": "/api/admin/setting/create/setting"
+            }
+        ]
+    }
+}

@@ -9,13 +9,17 @@ const otpSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  aadharNumber: {
+    type: String,
+    default: null
+  },
   otp: {
     type: String,
     required: true
   },
   type: {
     type: String,
-    enum: ['login', 'resend', 'register'],
+    enum: ['login', 'resend', 'register', 'aadhar'],
     required: true
   },
   expires_at: {

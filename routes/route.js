@@ -1,26 +1,64 @@
 const express = require("express");
 const multer = require("multer");
-const { protect, adminAuth } = require("../middleware/authMiddleware");
+const fs = require("fs");
+const { protect } = require("../middleware/authMiddleware");
 const UserController = require("../controllers/api/userController");
-const { profileUpdate } = require('../utils/validator/auth.validation');
+const ChatController = require("../controllers/api/chatController");
+const MessageController = require("../controllers/api/messageController");
+const StatusController = require("../controllers/api/statusController");
+const { profileUpdate, aadharverification, aadharVerify } = require('../utils/validator/auth.validation');
 
 const router = express.Router();
 
 // Multer storage setup (for single and multiple uploads)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); 
+    let folder = "uploads/";
+
+    // Decide folder based on field name
+    if (file.fieldname === "profilePic" || file.fieldname === "selfie") {
+      folder += "profiles";
+    } else if (file.fieldname === "media") {
+      folder += "messages";
+    }else if (file.fieldname === "statusMedia") {
+      folder += "status";
+    }
+
+    // Ensure the folder exists
+    fs.mkdirSync(folder, { recursive: true });
+
+    cb(null, folder);
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
+    cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
 const uploadSingle = multer({ storage });
-const uploadMulti = multer({ storage }).array("files", 10); 
+const uploadMulti = multer({ storage }).fields([
+  { name: 'profilePic', maxCount: 1 },
+  { name: 'selfie', maxCount: 1 }
+]);
 
+router.post("/aadhar-verification", protect, aadharverification, UserController.aadharVerification);
+router.post("/aadhar-verify", protect, aadharVerify, UserController.aadharVerify);
 router.get("/profile", protect, UserController.userDashboard);
-router.post("/profile-update", protect, uploadSingle.single('profilePic'), profileUpdate, UserController.profileUpdate);
+router.post("/profile-update", protect, uploadMulti, profileUpdate, UserController.profileUpdate);
 router.get("/user", protect, UserController.searchUsers);
+// Chat Route
+router.post('/chat', protect, ChatController.accessChats);
+router.get('/chat/access', protect, ChatController.fetchAllChats);
+router.post('/group', protect, ChatController.createGroup);
+router.patch('/group/rename', protect, ChatController.renameGroup);
+router.patch('/groupAdd', protect, ChatController.addToGroup);
+router.patch('/groupRemove', protect, ChatController.removeFromGroup);
+router.delete('/removeuser', protect);
+// Message Route
+router.post("/message", protect, uploadSingle.single('media'), MessageController.sendMessage);
+router.get("/message/:chatId", protect, MessageController.getMessages);
+// Status Route
+router.post('/status', protect, uploadSingle.single('statusMedia'), StatusController.createStatus);
+router.get('/status/me', protect, StatusController.getOwnStatuses );
+router.post('/status/view/:statusId', protect, StatusController.viewStatus);
 
 module.exports = router;
