@@ -6,6 +6,7 @@ const UserController = require("../controllers/api/userController");
 const ChatController = require("../controllers/api/chatController");
 const MessageController = require("../controllers/api/messageController");
 const StatusController = require("../controllers/api/statusController");
+const PollController = require('../controllers//api/pollController');
 const { profileUpdate, aadharverification, aadharVerify } = require('../utils/validator/auth.validation');
 
 const router = express.Router();
@@ -22,6 +23,8 @@ const storage = multer.diskStorage({
       folder += "messages";
     }else if (file.fieldname === "statusMedia") {
       folder += "status";
+    }else if (file.fieldname === "mediaFiles") {
+      folder += "poolEvent";
     }
 
     // Ensure the folder exists
@@ -56,9 +59,17 @@ router.delete('/removeuser', protect);
 // Message Route
 router.post("/message", protect, uploadSingle.single('media'), MessageController.sendMessage);
 router.get("/message/:chatId", protect, MessageController.getMessages);
+router.delete("/message/:messageId", protect, MessageController.deleteMessage);
 // Status Route
 router.post('/status', protect, uploadSingle.single('statusMedia'), StatusController.createStatus);
 router.get('/status/me', protect, StatusController.getOwnStatuses );
 router.post('/status/view/:statusId', protect, StatusController.viewStatus);
+router.delete('/status/:statusId', protect, StatusController.deleteStatus);
+// Poll Controller
+router.post('/poll', protect, uploadSingle.array('mediaFiles'), PollController.createPoll);
+router.get('/poll/:id', protect, PollController.getPoll);
+router.post('/poll/:id/response', protect, PollController.submitResponse);
+router.get('/poll/:id/results', protect, PollController.getResults);
+router.delete('/poll/:id', protect, PollController.deletePoll);
 
 module.exports = router;

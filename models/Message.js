@@ -21,6 +21,20 @@ const messageSchema = new mongoose.Schema(
         enum: ['image', 'video', 'audio', 'document'],
       },
     },
+    pollId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Poll',
+    },
+    deletedForEveryone: {
+      type: Boolean,
+      default: false,
+    },
+    deletedForUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     timestamps: true,

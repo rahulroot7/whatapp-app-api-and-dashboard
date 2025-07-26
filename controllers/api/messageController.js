@@ -56,11 +56,21 @@ controller.sendMessage = async (req, res) => {
 controller.getMessages = async (req, res) => {
   const { chatId } = req.params;
   try {
-    const messages = await Message.find({ chatId })
+    const messages = await Message.find({ chatId, deletedForUsers: { $ne: req.rootUserId }, })
       .populate({
         path: 'sender',
         model: 'User',
         select: 'name profilePic email',
+      })
+      .populate({
+        path: 'pollId',
+        populate: [
+          { path: 'creator', select: 'name profilePic' },
+          {
+            path: 'responses.user',
+            select: 'name profilePic',
+          }
+        ]
       })
       .populate({
         path: 'chatId',
@@ -71,6 +81,47 @@ controller.getMessages = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json(new ApiError(500, "Failed to fetch messages", [error.message]));
+  }
+};
+
+controller.deleteMessage = async (req, res) => {
+  const { messageId } = req.params;
+  const { forEveryone = false } = req.query; 
+  const userId = req.rootUserId;
+  try {
+    const message = await Message.findById(messageId);
+
+    if (!message) {
+      return res.status(404).json(new ApiError(404, "Message not found"));
+    }
+    // If deleting for everyone
+    if (forEveryone === 'true') {
+      if (String(message.sender) !== String(userId)) {
+        return res.status(403).json(new ApiError(403, "You can only delete your own messages for everyone"));
+      }
+      // Optional: allow within 1 hour only
+      const messageTime = new Date(message.createdAt).getTime();
+      const currentTime = Date.now();
+      const timeDifference = (currentTime - messageTime) / 1000 / 60; // in minutes
+
+      if (timeDifference > 60) {
+        return res.status(403).json(new ApiError(403, "You can delete messages for everyone within 1 hour only"));
+      }
+      message.message = "This message was deleted";
+      message.media = null;
+      message.deletedForEveryone = true;
+      await message.save();
+      return res.status(200).json(new ApiResponse(200, message, "Message deleted for everyone"));
+    }
+    // Deleting for me only
+    if (!message.deletedForUsers.includes(userId)) {
+      message.deletedForUsers.push(userId);
+      await message.save();
+    }
+    return res.status(200).json(new ApiResponse(200, message, "Message deleted for you"));
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json(new ApiError(500, "Failed to delete message", [error.message]));
   }
 };
 
