@@ -21,6 +21,7 @@ const protect = async (req, res, next) => {
       return res.status(401).json(new ApiResponse(401, null, 'User not found'));
     }
     if (user.status !== '1') {
+      console.log('ssdssdasdasdf');
       return res.status(401).json(new ApiError(401, 'User is not active', 'Unauthorized'));
     }
 
@@ -29,6 +30,7 @@ const protect = async (req, res, next) => {
     req.rootUserId = user._id;
     next();
   } catch (error) {
+    console.log('ssdsf');
     return res.status(401).json(new ApiError(401, error.message, 'Unauthorized'));
   }
 };

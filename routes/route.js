@@ -6,7 +6,8 @@ const UserController = require("../controllers/api/userController");
 const ChatController = require("../controllers/api/chatController");
 const MessageController = require("../controllers/api/messageController");
 const StatusController = require("../controllers/api/statusController");
-const PollController = require('../controllers//api/pollController');
+const PollController = require('../controllers/api/pollController');
+const EventController = require('../controllers/api/eventController');
 const { profileUpdate, aadharverification, aadharVerify } = require('../utils/validator/auth.validation');
 
 const router = express.Router();
@@ -71,5 +72,12 @@ router.get('/poll/:id', protect, PollController.getPoll);
 router.post('/poll/:id/response', protect, PollController.submitResponse);
 router.get('/poll/:id/results', protect, PollController.getResults);
 router.delete('/poll/:id', protect, PollController.deletePoll);
+// Event Routes
+router.post("/event", protect, EventController.createEvent);
+router.get("/event/:id", protect, EventController.getEvent);
+router.get("/events/chat/:chatId", protect, EventController.getChatEvents);
+router.post("/event/:id/rsvp", protect, EventController.submitRSVP);
+router.patch("/event/:id", protect, EventController.updateEvent);
+router.delete("/event/:id", protect, EventController.deleteEvent);
 
 module.exports = router;

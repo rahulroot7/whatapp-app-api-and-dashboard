@@ -25,6 +25,10 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Poll',
     },
+    eventId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Event',
+    },
     deletedForEveryone: {
       type: Boolean,
       default: false,

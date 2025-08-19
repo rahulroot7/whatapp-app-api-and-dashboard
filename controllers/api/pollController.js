@@ -62,16 +62,16 @@ controller.submitResponse = async (req, res) => {
     const { answers } = req.body;
 
     const poll = await Poll.findById(id);
-    if (!poll) return res.status(404).json(new ApiError(404, 'Poll not found'));
+    if (!poll) return res.status(404).json(new ApiError(404, null, 'Poll not found'));
 
     if (poll.expiresAt && new Date() > new Date(poll.expiresAt)) {
-      return res.status(400).json(new ApiError(400, 'Poll has expired'));
+      return res.status(400).json(new ApiError(400, null, 'Poll has expired'));
     }
 
     // Check if user already responded
     const alreadyVoted = poll.responses.some(r => r.user.toString() === req.rootUserId);
     if (alreadyVoted && !poll.allowsMultipleVotes) {
-      return res.status(403).json(new ApiError(403, 'You have already voted'));
+      return res.status(403).json(new ApiError(403, null, 'You have already voted'));
     }
 
     poll.responses.push({ user: req.rootUserId, answers });
@@ -89,9 +89,15 @@ controller.getResults = async (req, res) => {
     if (!poll) return res.status(404).json(new ApiError(404, 'Poll not found'));
 
     const results = poll.questions.map((q, qi) => {
-      const questionResult = { question: q.questionText, type: q.questionType, options: [] };
+      const questionResult = { 
+        question: q.questionText, 
+        type: q.questionType, 
+        options: [], 
+        responses: [] 
+      };
 
       if (q.questionType === 'mcq') {
+        // Count votes per option
         questionResult.options = q.options.map((opt, oi) => ({
           text: opt.text,
           media: opt.media,
@@ -101,6 +107,37 @@ controller.getResults = async (req, res) => {
             return acc;
           }, 0),
         }));
+      } 
+      else if (q.questionType === 'rating') {
+        // Collect ratings & average
+        const ratings = poll.responses
+          .map(r => r.answers.find(a => a.questionIndex === qi)?.rating)
+          .filter(r => r !== undefined);
+
+        questionResult.responses = ratings;
+        questionResult.average =
+          ratings.length > 0
+            ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2)
+            : null;
+      } 
+      else if (q.questionType === 'yesno') {
+        // Count yes / no
+        let yes = 0, no = 0;
+        poll.responses.forEach(r => {
+          const answer = r.answers.find(a => a.questionIndex === qi);
+          if (answer?.yesNo === true) yes++;
+          if (answer?.yesNo === false) no++;
+        });
+        questionResult.options = [
+          { text: 'Yes', votes: yes },
+          { text: 'No', votes: no },
+        ];
+      } 
+      else if (q.questionType === 'text') {
+        // Collect all text answers
+        questionResult.responses = poll.responses
+          .map(r => r.answers.find(a => a.questionIndex === qi)?.text)
+          .filter(t => t !== undefined);
       }
 
       return questionResult;
@@ -111,6 +148,7 @@ controller.getResults = async (req, res) => {
     res.status(500).json(new ApiError(500, 'Failed to fetch results', [error.message]));
   }
 };
+
 
 controller.deletePoll = async (req, res) => {
   try {

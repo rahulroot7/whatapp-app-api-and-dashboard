@@ -73,6 +73,13 @@ controller.getMessages = async (req, res) => {
         ]
       })
       .populate({
+        path: 'eventId',
+        populate: [
+          { path: 'creator', select: 'name profilePic' },
+          { path: 'rsvps.user', select: 'name profilePic' }
+        ]
+      })
+      .populate({
         path: 'chatId',
         model: 'Chat',
       });
