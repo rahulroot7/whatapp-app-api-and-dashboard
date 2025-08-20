@@ -27,10 +27,29 @@ const chatSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    // For temporary group
+    isTemporary: {
+      type: Boolean,
+      default: false,
+    },
+    expiresAt: {
+      type: Date, // group expiry
+    },
+    temporaryMembers: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        expiresAt: { type: Date }, // member expiry
+      }
+    ],
+    deletedAt: { type: Date, default: null },
   },
   {
     timestamps: true,
   }
 );
+
+chatSchema.index({ isTemporary: 1, expiresAt: 1 });
+chatSchema.index({ "temporaryMembers.expiresAt": 1 });
+chatSchema.index({ deletedAt: 1 });
 
 module.exports = mongoose.models.Chat || mongoose.model('Chat', chatSchema);

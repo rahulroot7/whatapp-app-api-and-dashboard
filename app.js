@@ -11,6 +11,7 @@ const connectDB = require('./config/config');
 const authRoutes = require('./routes/auth');
 const globleRoutes = require('./routes/route');
 const adminRoutes = require('./routes/adminRoute');
+const {startTemporaryGroupCleanupCron } = require('./jobs/temporaryGroupCleanup');
 
 const app = express();
 connectDB();
@@ -74,3 +75,6 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+// remove temporary group when expire
+startTemporaryGroupCleanupCron();

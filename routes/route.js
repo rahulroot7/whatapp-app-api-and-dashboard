@@ -52,7 +52,8 @@ router.get("/user", protect, UserController.searchUsers);
 // Chat Route
 router.post('/chat', protect, ChatController.accessChats);
 router.get('/chat/access', protect, ChatController.fetchAllChats);
-router.post('/group', protect, ChatController.createGroup);
+router.post('/group', protect, ChatController.createGroup); // this route used for normal group and temporary group create
+router.patch('/group/addTemporaryMember', protect, ChatController.addTemporaryMember);
 router.patch('/group/rename', protect, ChatController.renameGroup);
 router.patch('/groupAdd', protect, ChatController.addToGroup);
 router.patch('/groupRemove', protect, ChatController.removeFromGroup);

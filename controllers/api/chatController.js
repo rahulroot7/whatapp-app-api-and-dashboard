@@ -69,7 +69,7 @@ controller.fetchAllChats = async (req, res) => {
 
 controller.createGroup = async (req, res) => {
   try {
-    const { chatName, users } = req.body;
+    const { chatName, users, isTemporary, durationDays } = req.body;
 
     if (!chatName || !users) {
       return res.status(400).json(new ApiError(400, null, "chatName and users are required"));
@@ -87,6 +87,8 @@ controller.createGroup = async (req, res) => {
       users: parsedUsers,
       isGroup: true,
       groupAdmin: req.rootUserId,
+      isTemporary: isTemporary || false,
+      expiresAt: isTemporary ? new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000) : null,
     });
 
     const createdChat = await Chat.findById(groupChat._id)
@@ -182,6 +184,38 @@ controller.removeFromGroup = async (req, res) => {
 
 controller.removeContact = async (req, res) => {
   return res.status(501).json(new ApiError(501, "Not implemented"));
+};
+
+controller.addTemporaryMember = async (req, res) => {
+  try {
+    const { chatId, userId, durationDays } = req.body;
+
+    if (!chatId || !userId || !durationDays) {
+      return res.status(400).json(new ApiError(400, null, "chatId, userId and durationDays are required"));
+    }
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json(new ApiError(404, null, "Chat not found"));
+    }
+    // Add to users if not already there
+    if (!chat.users.includes(userId)) {
+      chat.users.push(userId);
+    }
+    // Add to temporaryMembers list
+    chat.temporaryMembers.push({
+      user: userId,
+      expiresAt: new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000),
+    });
+    await chat.save();
+    const updatedChat = await Chat.findById(chatId)
+      .populate('users', '-password')
+      .populate('groupAdmin', '-password');
+
+    return res.status(200).json(new ApiResponse(200, updatedChat, "Temporary member added successfully"));
+  } catch (error) {
+    return res.status(500).json(new ApiError(500, "Internal Server Error", [error.message]));
+  }
 };
 
 module.exports = controller;
