@@ -8,6 +8,7 @@ const MessageController = require("../controllers/api/messageController");
 const StatusController = require("../controllers/api/statusController");
 const PollController = require('../controllers/api/pollController');
 const EventController = require('../controllers/api/eventController');
+const TaskController = require('../controllers/api/taskController');
 const { profileUpdate, aadharverification, aadharVerify } = require('../utils/validator/auth.validation');
 
 const router = express.Router();
@@ -45,6 +46,7 @@ const uploadMulti = multer({ storage }).fields([
   { name: 'profilePic', maxCount: 1 },
   { name: 'selfie', maxCount: 1 }
 ]);
+const uploadTaskFiles = multer({ storage }).array('taskFiles', 10);
 
 router.post("/aadhar-verification", protect, aadharverification, UserController.aadharVerification);
 router.post("/aadhar-verify", protect, aadharVerify, UserController.aadharVerify);
@@ -82,5 +84,14 @@ router.get("/events/chat/:chatId", protect, EventController.getChatEvents);
 router.post("/event/:id/rsvp", protect, EventController.submitRSVP);
 router.patch("/event/:id", protect, EventController.updateEvent);
 router.delete("/event/:id", protect, EventController.deleteEvent);
+// Tak management
+router.post("/task", protect, TaskController.createTask);
+router.get("/task/:id", protect, TaskController.getTask);
+router.get("/tasks/chat/:chatId", protect, TaskController.getChatTasks);
+router.patch("/task/:id", protect, TaskController.updateTask);
+router.patch("/task/:id/status", protect, TaskController.updateMyTaskStatus);
+router.patch("/task/:id/checklist", protect, TaskController.updateChecklist);
+router.post("/task/:id/attachments", protect, uploadTaskFiles, TaskController.addAttachments);
+router.delete("/task/:id", protect, TaskController.deleteTask);
 
 module.exports = router;

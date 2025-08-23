@@ -29,6 +29,10 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Event',
     },
+    taskId: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Task" 
+    },
     deletedForEveryone: {
       type: Boolean,
       default: false,

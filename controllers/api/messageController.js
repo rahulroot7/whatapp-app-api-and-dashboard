@@ -80,6 +80,14 @@ controller.getMessages = async (req, res) => {
         ]
       })
       .populate({
+        path: 'taskId',
+        populate: [
+          { path: 'creator', select: 'name photo' },
+          { path: 'assignees.user', select: 'name photo' }
+        ],
+        select: 'title priority dueDate attachments assignees checklist'
+      })
+      .populate({
         path: 'chatId',
         model: 'Chat',
       });
