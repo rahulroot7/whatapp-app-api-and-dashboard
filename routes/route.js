@@ -26,6 +26,8 @@ const storage = multer.diskStorage({
       folder += "status";
     }else if (file.fieldname === "mediaFiles") {
       folder += "poolEvent";
+    } else if (file.fieldname === "taskFiles") {
+      folder += "tasks";
     }
 
     // Ensure the folder exists
