@@ -30,7 +30,6 @@ const protect = async (req, res, next) => {
     req.rootUserId = user._id;
     next();
   } catch (error) {
-    console.log('ssdsf');
     return res.status(401).json(new ApiError(401, error.message, 'Unauthorized'));
   }
 };
