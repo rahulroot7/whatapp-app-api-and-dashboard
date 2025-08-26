@@ -6,13 +6,13 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    message: {
-      type: String,
-      trim: true,
-    },
     chatId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Chat',
+    },
+    message: {
+      type: String,
+      trim: true,
     },
     media: {
       url: { type: String },
@@ -20,6 +20,17 @@ const messageSchema = new mongoose.Schema(
         type: String,
         enum: ['image', 'video', 'audio', 'document'],
       },
+    },
+    contact: {
+      name: { type: String },
+      phone: { type: String },
+      email: { type: String },
+      photo: { type: String }, // optional
+    },
+    location: {
+      latitude: { type: Number },
+      longitude: { type: Number },
+      address: { type: String }, // optional human-readable address
     },
     pollId: {
       type: mongoose.Schema.Types.ObjectId,

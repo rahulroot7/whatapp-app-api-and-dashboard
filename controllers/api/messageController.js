@@ -7,10 +7,11 @@ const ApiResponse = require("../../utils/ApiResponse");
 const controller = {};
 
 controller.sendMessage = async (req, res) => {
-  const { chatId, message } = req.body;
+  const { chatId, message, contact, location } = req.body;
   let media = null;
 
   try {
+    // Handle media upload
     if (req.file) {
       const mimeType = req.file.mimetype;
       let type = 'document';
@@ -25,12 +26,24 @@ controller.sendMessage = async (req, res) => {
       };
     }
 
-    let msg = await Message.create({
+    // Build payload dynamically
+    const payload = {
       sender: req.rootUserId,
-      message,
       chatId,
+      message,
       media,
-    });
+    };
+
+    if (contact) {
+      payload.contact = JSON.parse(contact); 
+      // Example: { "name":"Rahul", "phone":"+91 9999999999", "email":"rahul@test.com" }
+    }
+
+    if (location) {
+      payload.location = JSON.parse(location);
+      // Example: { "latitude":28.6139, "longitude":77.2090, "address":"New Delhi, India" }
+    }
+    let msg = await Message.create(payload);
 
     msg = await (
       await msg.populate('sender', 'name profilePic email')
@@ -51,7 +64,6 @@ controller.sendMessage = async (req, res) => {
     res.status(500).json(new ApiError(500, 'Failed to send message', [error.message]));
   }
 };
-
 
 controller.getMessages = async (req, res) => {
   const { chatId } = req.params;
