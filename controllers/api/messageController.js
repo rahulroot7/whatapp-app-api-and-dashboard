@@ -100,6 +100,14 @@ controller.getMessages = async (req, res) => {
         select: 'title priority dueDate attachments assignees checklist'
       })
       .populate({
+        path: "billId",
+        populate: [
+          { path: "creator", select: "first_name last_name profilePic email" },
+          { path: "participants.user", select: "first_name last_name email phone profilePic" }
+        ],
+        select: "title label totalAmount splitType tax tip discount participants receipts createdAt"
+      })
+      .populate({
         path: 'chatId',
         model: 'Chat',
       });

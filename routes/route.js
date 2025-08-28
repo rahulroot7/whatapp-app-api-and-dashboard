@@ -10,6 +10,7 @@ const PollController = require('../controllers/api/pollController');
 const EventController = require('../controllers/api/eventController');
 const TaskController = require('../controllers/api/taskController');
 const { profileUpdate, aadharverification, aadharVerify } = require('../utils/validator/auth.validation');
+const BillController = require('../controllers/api/billController');
 
 const router = express.Router();
 
@@ -29,6 +30,8 @@ const storage = multer.diskStorage({
       folder += "poolEvent";
     } else if (file.fieldname === "taskFiles") {
       folder += "tasks";
+    } else if (file.fieldname === "receipts") {
+      folder += "receipts";
     }
 
     // Ensure the folder exists
@@ -93,5 +96,12 @@ router.patch("/task/:id/status", protect, TaskController.updateMyTaskStatus);
 router.patch("/task/:id/checklist", protect, TaskController.updateChecklist);
 router.post("/task/:id/attachments", protect, uploadTaskFiles, TaskController.addAttachments);
 router.delete("/task/:id", protect, TaskController.deleteTask);
+// Bill split
+router.post("/bill/group", protect, BillController.createBillGroup);
+router.post("/bill", protect, uploadSingle.array("receipts"), BillController.createBill);
+router.get("/bill/:id", protect, BillController.getBill);
+router.post("/bill/:id/settle", protect, BillController.settlePayment);
+router.get("/bill/:id/summary", protect, BillController.getBillSummary);
+router.delete("/bill/:id", protect, BillController.deleteBill);
 
 module.exports = router;

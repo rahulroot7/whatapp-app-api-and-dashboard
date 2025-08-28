@@ -41,6 +41,10 @@ const chatSchema = new mongoose.Schema(
         expiresAt: { type: Date }, // member expiry
       }
     ],
+    billSplit: {
+      type: Boolean,
+      default: false,
+    },
     deletedAt: { type: Date, default: null },
   },
   {
@@ -51,5 +55,6 @@ const chatSchema = new mongoose.Schema(
 chatSchema.index({ isTemporary: 1, expiresAt: 1 });
 chatSchema.index({ "temporaryMembers.expiresAt": 1 });
 chatSchema.index({ deletedAt: 1 });
+chatSchema.index({ billSplit: 1 });
 
 module.exports = mongoose.models.Chat || mongoose.model('Chat', chatSchema);

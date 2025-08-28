@@ -10,6 +10,10 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Chat',
     },
+    billId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Bill',
+    },
     message: {
       type: String,
       trim: true,
@@ -43,6 +47,10 @@ const messageSchema = new mongoose.Schema(
     taskId: { 
       type: mongoose.Schema.Types.ObjectId, 
       ref: "Task" 
+    },
+    billId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Bill',
     },
     deletedForEveryone: {
       type: Boolean,
