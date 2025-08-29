@@ -140,7 +140,7 @@ controller.createBill = async (req, res) => {
 controller.getBill = async (req, res) => {
   try {
     const bill = await Bill.findById(req.params.id).populate("participants.user", "first_name email");
-    if (!bill) return res.status(404).json(new ApiError(404, "Bill not found"));
+    if (!bill) return res.status(404).json(new ApiError(404, null, "Bill not found"));
     res.status(200).json(new ApiResponse(200, bill, "Bill fetched"));
   } catch (error) {
     res.status(500).json(new ApiError(500, "Error fetching bill", [error.message]));

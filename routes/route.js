@@ -11,6 +11,7 @@ const EventController = require('../controllers/api/eventController');
 const TaskController = require('../controllers/api/taskController');
 const { profileUpdate, aadharverification, aadharVerify } = require('../utils/validator/auth.validation');
 const BillController = require('../controllers/api/billController');
+const PostController = require('../controllers/api/postController');
 
 const router = express.Router();
 
@@ -32,6 +33,8 @@ const storage = multer.diskStorage({
       folder += "tasks";
     } else if (file.fieldname === "receipts") {
       folder += "receipts";
+    } else if (file.fieldname === "mediaPost") {
+      folder += "posts";
     }
 
     // Ensure the folder exists
@@ -50,6 +53,7 @@ const uploadMulti = multer({ storage }).fields([
   { name: 'selfie', maxCount: 1 }
 ]);
 const uploadTaskFiles = multer({ storage }).array('taskFiles', 10);
+const uploadPost = multer({ storage }).array('mediaPost', 10);
 
 router.post("/aadhar-verification", protect, aadharverification, UserController.aadharVerification);
 router.post("/aadhar-verify", protect, aadharVerify, UserController.aadharVerify);
@@ -103,5 +107,13 @@ router.get("/bill/:id", protect, BillController.getBill);
 router.post("/bill/:id/settle", protect, BillController.settlePayment);
 router.get("/bill/:id/summary", protect, BillController.getBillSummary);
 router.delete("/bill/:id", protect, BillController.deleteBill);
+// Post Feed Route
+router.post("/post-feed", protect, uploadPost, PostController.createPost);
+router.get("/post-feed", protect, PostController.getPublicFeed);
+router.get("/post-feed/:id", protect, PostController.getPostById);
+router.post("/post-feed/:id/view", protect, PostController.viewPost);
+router.post("/post-feed/:id/like", protect, PostController.toggleLike);
+router.post("/post-feed/:id/comment", protect, PostController.addComment);
+router.delete("/post-feed/:id", protect, PostController.deletePost);
 
 module.exports = router;
