@@ -6,13 +6,17 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    message: {
-      type: String,
-      trim: true,
-    },
     chatId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Chat',
+    },
+    billId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Bill',
+    },
+    message: {
+      type: String,
+      trim: true,
     },
     media: {
       url: { type: String },
@@ -20,6 +24,17 @@ const messageSchema = new mongoose.Schema(
         type: String,
         enum: ['image', 'video', 'audio', 'document'],
       },
+    },
+    contact: {
+      name: { type: String },
+      phone: { type: String },
+      email: { type: String },
+      photo: { type: String }, // optional
+    },
+    location: {
+      latitude: { type: Number },
+      longitude: { type: Number },
+      address: { type: String }, // optional human-readable address
     },
     pollId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -32,6 +47,10 @@ const messageSchema = new mongoose.Schema(
     taskId: { 
       type: mongoose.Schema.Types.ObjectId, 
       ref: "Task" 
+    },
+    billId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Bill',
     },
     deletedForEveryone: {
       type: Boolean,

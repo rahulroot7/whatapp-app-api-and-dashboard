@@ -55,7 +55,7 @@ controller.fetchAllChats = async (req, res) => {
       .populate('latestMessage')
       .populate('groupAdmin', '-password')
       .sort({ updatedAt: -1 });
-
+    
     const finalChats = await User.populate(chats, {
       path: 'latestMessage.sender',
       select: 'first_name last_name email',
