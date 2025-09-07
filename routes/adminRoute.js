@@ -6,6 +6,9 @@ const AdminController = require("../controllers/Admin/AdminController");
 const RoleController = require("../controllers/Admin/roleController");
 const { roleCreate } = require('../utils/validator/role.validation');
 const { userCreate } = require('../utils/validator/admin/user.validation');
+const EventController = require("../controllers/Admin/eventController");
+const PollController = require("../controllers/Admin/pollController");
+const TaskController = require("../controllers/Admin/taskController");
 
 const router = express.Router();
 
@@ -47,6 +50,10 @@ router.put('/user/restore/:id', protect, adminProtect, AdminController.restoreUs
 router.get("/user/change/status/:id",protect, adminProtect, AdminController.userChangeStatus);
 router.get("/dashboard-user/role", protect, AdminController.dashboardUserRoleGet); // For routes middleware chaeck
 router.get("/dashboard-user/role/details", protect, AdminController.dashboardUserRoleDetails); // For permission frontend
+// Events/Polls/Survey/Tasks Management Route
+router.get("/events", protect, adminProtect, EventController.eventList);
+router.get("/poll-and-survay", protect, adminProtect, PollController.pollSurvaytList);
+router.get("/tasks", protect, adminProtect, TaskController.taskList);
 // Roles & Permission
 router.get('/role/all/role', protect, dashboardProtect, RoleController.getAllRole);
 router.get('/role/view/role/:_id', protect, RoleController.getRoleById);

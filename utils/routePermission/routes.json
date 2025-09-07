@@ -85,10 +85,22 @@
             }
         ]
     },
-    "setting": {
+    "Events/Polls/Survey/Tasks": {
         "routes": [
             {
                 "key": "view",
+                "route": [
+                    "/api/admin/events",
+                    "/api/admin/poll-and-survay",
+                    "/api/admin/tasks"
+                ]
+            }
+        ]
+    },
+    "setting": {
+        "routes": [
+            {
+                "key": "list",
                 "route": "/api/admin/setting/view/setting"
             },
             {
