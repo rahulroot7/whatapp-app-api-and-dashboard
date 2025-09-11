@@ -189,6 +189,38 @@ controller.userChangeStatus = async (req, res) => {
   }
 };
 
+controller.updateShoppingFeedStatus = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { status } = req.body; // "approved" | "rejected" | "pending"
+
+    if (!["approved", "rejected", "pending"].includes(status)) {
+      return res.status(400).json(new ApiError(400, null, "Invalid status value"));
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json(new ApiError(404, null, "User not found"));
+    }
+
+    user.shoppingFeedStatus = status;
+    await user.save();
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        { userId: user._id, status: user.shoppingFeedStatus },
+        "Shopping Feed status updated"
+      )
+    );
+  } catch (error) {
+    return res
+      .status(500)
+      .json(new ApiError(500, "Failed to update status", [error.message]));
+  }
+};
+
+
 controller.userDelete = async (req, res) => {
   try {
     const userId = req.params.id;

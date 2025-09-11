@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema({
     required: false
   },
   status: { type: String, enum: ['0', '1', '2'], default: '0' },
+  shoppingFeedStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
   // 0 - active, 1 - inactive, 2 - blocked
   email_verified: { type: Boolean, default: false },
   bio: { type: String, default: 'Available' },

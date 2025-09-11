@@ -85,7 +85,7 @@
             }
         ]
     },
-    "Events/Polls/Survey/Tasks": {
+    "events/polls/survey/tasks": {
         "routes": [
             {
                 "key": "view",
@@ -93,6 +93,32 @@
                     "/api/admin/events",
                     "/api/admin/poll-and-survay",
                     "/api/admin/tasks"
+                ]
+            }
+        ]
+    },
+    "bill": {
+        "routes": [
+            {
+                "key": "list",
+                "route": [
+                    "/api/admin/bills"
+                ]
+            },
+            {
+                "key": "view",
+                "route": "/api/admin/bills/:id"
+            },
+            {
+                "key": "update",
+                "route": [
+                    "/api/admin/bills/:id"
+                ]
+            },
+            {
+                "key": "delete",
+                "route": [
+                    "/api/admin/bills/:id"
                 ]
             }
         ]
