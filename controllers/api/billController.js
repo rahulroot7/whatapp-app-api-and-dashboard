@@ -153,8 +153,7 @@ controller.settlePayment = async (req, res) => {
     const { id } = req.params;
     const bill = await Bill.findById(id);
     if (!bill) return res.status(404).json(new ApiError(404, null, "Bill not found"));
-
-    const participant = bill.participants.find((p) => p.user.toString() === req.rootUserId);
+    const participant = bill.participants.find((p) => p.user.toString() === req.rootUserId.toString());
     if (!participant) return res.status(400).json(new ApiError(400, null, "You are not part of this bill"));
 
     participant.settled = true;

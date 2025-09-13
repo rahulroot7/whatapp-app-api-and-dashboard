@@ -11,6 +11,7 @@ const PollController = require("../controllers/Admin/pollController");
 const TaskController = require("../controllers/Admin/taskController");
 const BillController = require("../controllers/Admin/billController");
 const ShopCategoryController = require("../controllers/Admin/shoppingCategoryController");
+const PostController = require("../controllers/Admin/postController");
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ const storage = multer.diskStorage({
 const uploadSingle = multer({ storage });
 const uploadMulti = multer({ storage }).array("files", 10); 
 
-router.get("/dashboard", protect, adminProtect, AdminController.userList);
+router.get("/dashboard", protect, adminProtect, AdminController.dashboard);
 router.get("/profile", protect, adminProtect, AdminController.userProfile);
 router.get("/users/list", protect, adminProtect, dashboardProtect, AdminController.userList);
 router.get("/business/users/list", protect, adminProtect, dashboardProtect, AdminController.businessUserList);
@@ -63,10 +64,20 @@ router.get("/bills/:id", adminProtect, BillController.getBillDetails);
 router.put("/bills/:id", adminProtect, BillController.updateBill);
 router.delete("/bills/:id", adminProtect, BillController.deleteBill);
 // shopping category ROute
-router.post("/category", ShopCategoryController.createCategory);
-router.get("/categories", ShopCategoryController.listCategories);
-router.put("/category/:categoryId", ShopCategoryController.updateCategory);
-router.delete("/category/:categoryId", ShopCategoryController.deleteCategory);
+router.post("/category", protect, ShopCategoryController.createCategory);
+router.get("/categories", protect, ShopCategoryController.listCategories);
+router.put("/category/:categoryId", protect, ShopCategoryController.updateCategory);
+router.delete("/category/:categoryId", protect, ShopCategoryController.deleteCategory);
+// post Management
+router.get("/post-feed", protect, adminProtect, PostController.getAllPosts);
+router.get("/post-feed/:id", protect, adminProtect, PostController.getPostById);
+router.put("/post-feed/:id", protect, adminProtect, PostController.updatePost);
+router.delete("/post-feed/:id", protect, adminProtect, PostController.softDeletePost);
+router.patch("/post-feed/:id/restore", protect, adminProtect, PostController.restorePost);
+router.get("/shopping-posts", protect, PostController.listPosts);
+router.get("/shopping-posts/:id", protect, PostController.getPostById);
+router.delete("/shopping-posts/:id", protect, PostController.softDeletePost);
+router.put("/shopping-posts/:id/restore", protect, PostController.restorePost);
 // Roles & Permission
 router.get('/role/all/role', protect, dashboardProtect, RoleController.getAllRole);
 router.get('/role/view/role/:_id', protect, RoleController.getRoleById);

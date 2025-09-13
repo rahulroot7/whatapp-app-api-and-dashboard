@@ -123,6 +123,40 @@
             }
         ]
     },
+    "public/business/post": {
+        "routes": [
+            {
+                "key": "list",
+                "route": [
+                    "/api/admin/post-feed",
+                    "/api/admin/categories",
+                    "/api/admin/shopping-posts"
+                ]
+            },
+            {
+                "key": "view",
+                "route": [
+                    "/api/admin/post-feed/:id",
+                    "/api/admin/shopping-posts/:id"
+                ]
+            },
+            {
+                "key": "update",
+                "route": [
+                    "/api/admin/post-feed/:id",
+                    "/api/admin/category"
+                ]
+            },
+            {
+                "key": "delete",
+                "route": [
+                    "/api/admin/post-feed/:id",
+                    "/api/admin/category/:categoryId",
+                    "/api/admin/shopping-posts/:id"
+                ]
+            }
+        ]
+    },
     "setting": {
         "routes": [
             {
