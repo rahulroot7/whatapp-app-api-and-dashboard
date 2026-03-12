@@ -72,6 +72,7 @@ controller.updateRole = async (req, res) => {
     }
     const { _id, name, permissions } = req.body;
     const routes =  getPermissionRoutes(req.body)
+  console.log(permissions);
 
     const updated = await Role.findByIdAndUpdate(
       _id,

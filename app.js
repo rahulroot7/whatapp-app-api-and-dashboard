@@ -44,26 +44,31 @@ io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
   socket.on('setup', (userData) => {
-    socket.join(userData.id);
+    socket.join(userData.id); // join room with userId
+    console.log(`📡 User ${userData.id} joined their room`);
     socket.emit('connected');
   });
 
   socket.on('join room', (room) => {
     socket.join(room);
+    console.log(`Socket ${socket.id} joined room: ${room}`);
   });
 
   socket.on('typing', (room) => socket.in(room).emit('typing'));
-
   socket.on('stop typing', (room) => socket.in(room).emit('stop typing'));
 
   socket.on('new message', (newMessageReceive) => {
+    console.log("New message received at server:", newMessageReceive);
+
     const chat = newMessageReceive.chatId;
-    if (!chat.users) {
+    if (!chat || !chat.users) {
       console.log('chat.users is not defined');
       return;
     }
+
     chat.users.forEach((user) => {
-      if (user._id === newMessageReceive.sender._id) return;
+      if (user._id === newMessageReceive.sender._id) return; // don't send back to sender
+      console.log(`Sending message to user room: ${user._id}`);
       socket.in(user._id).emit('message received', newMessageReceive);
     });
   });

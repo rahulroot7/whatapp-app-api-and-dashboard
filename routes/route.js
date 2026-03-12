@@ -12,6 +12,7 @@ const TaskController = require('../controllers/api/taskController');
 const { profileUpdate, aadharverification, aadharVerify } = require('../utils/validator/auth.validation');
 const BillController = require('../controllers/api/billController');
 const PostController = require('../controllers/api/postController');
+const ShopController = require('../controllers/api/shoppingPostController');
 
 const router = express.Router();
 
@@ -35,6 +36,8 @@ const storage = multer.diskStorage({
       folder += "receipts";
     } else if (file.fieldname === "mediaPost") {
       folder += "posts";
+    } else if (file.fieldname === "mediashopPost") { 
+      folder += "shoppingPosts";
     }
 
     // Ensure the folder exists
@@ -54,6 +57,7 @@ const uploadMulti = multer({ storage }).fields([
 ]);
 const uploadTaskFiles = multer({ storage }).array('taskFiles', 10);
 const uploadPost = multer({ storage }).array('mediaPost', 10);
+const uploadShopPost = multer({ storage }).array("mediashopPost", 10);
 
 router.post("/aadhar-verification", protect, aadharverification, UserController.aadharVerification);
 router.post("/aadhar-verify", protect, aadharVerify, UserController.aadharVerify);
@@ -115,5 +119,14 @@ router.post("/post-feed/:id/view", protect, PostController.viewPost);
 router.post("/post-feed/:id/like", protect, PostController.toggleLike);
 router.post("/post-feed/:id/comment", protect, PostController.addComment);
 router.delete("/post-feed/:id", protect, PostController.deletePost);
+// Shopping Post
+router.post("/shop-feed", protect, uploadShopPost, ShopController.createPost);
+router.get("/shop-feed", protect, uploadShopPost, ShopController.listPosts);
+router.get("/shop-feed/:postId", protect, uploadShopPost, ShopController.PostDetail);
+router.put("/shop-feed/:postId", protect, ShopController.updatePost);
+router.delete("/shop-feed/:postId", protect, ShopController.deletePost);
+router.post("/shop-feed/:postId/like", protect, ShopController.likePost);
+router.post("/shop-feed/:postId/comment", protect, ShopController.addComment);
+router.post("/shop-feed/:postId/view", protect, ShopController.addView);
 
 module.exports = router;

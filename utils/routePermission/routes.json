@@ -85,10 +85,82 @@
             }
         ]
     },
-    "setting": {
+    "events/polls/survey/tasks": {
         "routes": [
             {
                 "key": "view",
+                "route": [
+                    "/api/admin/events",
+                    "/api/admin/poll-and-survay",
+                    "/api/admin/tasks"
+                ]
+            }
+        ]
+    },
+    "bill": {
+        "routes": [
+            {
+                "key": "list",
+                "route": [
+                    "/api/admin/bills"
+                ]
+            },
+            {
+                "key": "view",
+                "route": "/api/admin/bills/:id"
+            },
+            {
+                "key": "update",
+                "route": [
+                    "/api/admin/bills/:id"
+                ]
+            },
+            {
+                "key": "delete",
+                "route": [
+                    "/api/admin/bills/:id"
+                ]
+            }
+        ]
+    },
+    "public/business/post": {
+        "routes": [
+            {
+                "key": "list",
+                "route": [
+                    "/api/admin/post-feed",
+                    "/api/admin/categories",
+                    "/api/admin/shopping-posts"
+                ]
+            },
+            {
+                "key": "view",
+                "route": [
+                    "/api/admin/post-feed/:id",
+                    "/api/admin/shopping-posts/:id"
+                ]
+            },
+            {
+                "key": "update",
+                "route": [
+                    "/api/admin/post-feed/:id",
+                    "/api/admin/category"
+                ]
+            },
+            {
+                "key": "delete",
+                "route": [
+                    "/api/admin/post-feed/:id",
+                    "/api/admin/category/:categoryId",
+                    "/api/admin/shopping-posts/:id"
+                ]
+            }
+        ]
+    },
+    "setting": {
+        "routes": [
+            {
+                "key": "list",
                 "route": "/api/admin/setting/view/setting"
             },
             {

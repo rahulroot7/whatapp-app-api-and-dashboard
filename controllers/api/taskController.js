@@ -30,41 +30,51 @@ controller.createTask = async (req, res) => {
   try {
     const { chatId, title, description, dueDate, priority, checklist } = req.body;
 
-    const chat = await Chat.findById(chatId).lean(); 
+    // Find chat with users and groupAdmin populated
+    const chat = await Chat.findById(chatId)
+      .populate("users", "_id")
+      .populate("groupAdmin", "_id");
+
     if (!chat) return res.status(404).json(new ApiError(404, null, "Chat not found"));
 
     const rootUserId = req.rootUserId.toString();
+
+    // Check if requester is a member of the chat
     const isMember =
-      chat.users.some(u => u._id.toString() === rootUserId) ||
-      chat.groupAdmin?.toString() === rootUserId;
+      (Array.isArray(chat.users) && chat.users.some(u => u._id.toString() === rootUserId)) ||
+      chat.groupAdmin?._id.toString() === rootUserId;
 
     if (!isMember)
       return res.status(403).json(new ApiError(403, null, "Not a member of this chat"));
 
+    // Check if a similar task was created in the last 1 hour
     const [existing] = await Task.find({
-        chatId,
-        title,
-        creator: req.rootUserId
-        })
-        .sort({ createdAt: -1 })
-        .limit(1);
+      chatId,
+      title,
+      creator: req.rootUserId
+    })
+      .sort({ createdAt: -1 })
+      .limit(1);
 
     if (existing) {
-        const diff = Date.now() - existing.createdAt.getTime();
-        if (diff < 3600000) { // 1 hour = 60 * 60 * 1000 ms
-            return res.status(409).json(new ApiError(409, null, "Task already created recently"));
-        }
+      const diff = Date.now() - existing.createdAt.getTime();
+      if (diff < 3600000) {
+        return res.status(409).json(new ApiError(409, null, "Task already created recently"));
+      }
     }
-    // Normalize group users
+
+    // Normalize all chat users into assignees
     const allUsers = [
-      ...(chat.users || []).map(u => (u._id ? u._id.toString() : u.toString())),
-      chat.groupAdmin?.toString()
-    ].filter(Boolean); 
+      ...(Array.isArray(chat.users) ? chat.users.map(u => u._id.toString()) : []),
+      chat.groupAdmin?._id.toString()
+    ].filter(Boolean);
+
     const assignees = allUsers.map(uid => ({
       user: uid,
       status: "pending"
     }));
 
+    // Create the task
     const task = await Task.create({
       creator: req.rootUserId,
       chatId,
@@ -79,28 +89,30 @@ controller.createTask = async (req, res) => {
       history: [{ action: "created", user: req.rootUserId }]
     });
 
+    // Create a message to notify the chat
     await Message.create({
       sender: req.rootUserId,
       chatId,
       taskId: task._id
     });
 
+    // Populate task for sending back
     const populated = await Task.findById(task._id)
       .populate("creator", "name photo")
       .populate("assignees.user", "name photo")
       .lean();
 
+    // Emit to chat
     emitToChat(req, chatId, "task:created", populated);
 
-    res
-      .status(201)
-      .json(new ApiResponse(201, populated, "Task created for all group members"));
+    res.status(201).json(new ApiResponse(201, populated, "Task created for all group members"));
+
   } catch (error) {
-    res
-      .status(500)
-      .json(new ApiError(500, "Failed to create task", [error.message]));
+    console.error(error);
+    res.status(500).json(new ApiError(500, "Failed to create task", [error.message]));
   }
 };
+
 
 
 // ---------------------- Get Single Task (see all members' statuses) ----------------------
